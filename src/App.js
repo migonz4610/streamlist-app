@@ -4,7 +4,7 @@ import { Film, Home, ShoppingCart, Info, Plus, Trash2, Edit2, Check, X, Save, Se
 import './App.css';
 
 // TMDB API Configuration
-const TMDB_API_KEY = 'ADD YOUR API KEY HERE'; // Replace with your actual TMDB API key
+const TMDB_API_KEY = 'a4582cb8c1be8c2a9efe9cfacae756ce'; // Replace with your actual TMDB API key
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
