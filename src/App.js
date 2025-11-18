@@ -1,17 +1,33 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Film, Home, ShoppingCart, Info, Plus, Trash2, Edit2, Check, X, Save, Search, Star, Calendar, Clock, CheckCircle } from 'lucide-react';
+import { Film, Home, ShoppingCart, Info, Plus, Trash2, Edit2, Check, X, Save, Search, Star, Calendar, Clock, CheckCircle, Download } from 'lucide-react';
 import './App.css';
+
+// PWA Service Worker Registration
+const registerServiceWorker = () => {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((registration) => {
+          console.log('✅ Service Worker registered:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('❌ Service Worker registration failed:', error);
+        });
+    });
+  }
+};
 
 // TMDB API Configuration
 const TMDB_API_KEY = 'a4582cb8c1be8c2a9efe9cfacae756ce'; // Replace with your actual TMDB API key
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
 
-// 🆕 NEW: Create Context for sharing watchlist across components
+// ðŸ†• NEW: Create Context for sharing watchlist across components
 const WatchlistContext = createContext();
 
-// 🆕 NEW: Custom hook to use watchlist context
+// ðŸ†• NEW: Custom hook to use watchlist context
 const useWatchlist = () => {
   const context = useContext(WatchlistContext);
   if (!context) {
@@ -20,7 +36,7 @@ const useWatchlist = () => {
   return context;
 };
 
-// 🆕 NEW: Watchlist Provider Component
+// ðŸ†• NEW: Watchlist Provider Component
 const WatchlistProvider = ({ children }) => {
   const [streamList, setStreamList] = useState([]);
 
@@ -29,7 +45,7 @@ const WatchlistProvider = ({ children }) => {
     const savedList = localStorage.getItem('streamList');
     if (savedList) {
       setStreamList(JSON.parse(savedList));
-      console.log('✅ Loaded StreamList from localStorage:', JSON.parse(savedList));
+      console.log('âœ… Loaded StreamList from localStorage:', JSON.parse(savedList));
     }
   }, []);
 
@@ -37,13 +53,13 @@ const WatchlistProvider = ({ children }) => {
   useEffect(() => {
     if (streamList.length > 0) {
       localStorage.setItem('streamList', JSON.stringify(streamList));
-      console.log('✅ Saved StreamList to localStorage:', streamList);
+      console.log('âœ… Saved StreamList to localStorage:', streamList);
     } else if (streamList.length === 0) {
       localStorage.removeItem('streamList');
     }
   }, [streamList]);
 
-  // 🆕 NEW: Add item to watchlist (can be called from any component)
+  // ðŸ†• NEW: Add item to watchlist (can be called from any component)
   const addToWatchlist = (text) => {
     // Check if item already exists
     const exists = streamList.some(item => 
@@ -51,7 +67,7 @@ const WatchlistProvider = ({ children }) => {
     );
     
     if (exists) {
-      console.log('⚠️ Item already in watchlist:', text);
+      console.log('âš ï¸ Item already in watchlist:', text);
       return { success: false, message: 'Already in watchlist!' };
     }
 
@@ -63,11 +79,11 @@ const WatchlistProvider = ({ children }) => {
     };
     
     setStreamList([...streamList, newItem]);
-    console.log('✅ Added to StreamList:', newItem);
+    console.log('âœ… Added to StreamList:', newItem);
     return { success: true, message: 'Added to watchlist!' };
   };
 
-  // 🆕 NEW: Check if item is in watchlist
+  // ðŸ†• NEW: Check if item is in watchlist
   const isInWatchlist = (text) => {
     return streamList.some(item => 
       item.text.toLowerCase() === text.toLowerCase()
@@ -116,7 +132,7 @@ const WatchlistProvider = ({ children }) => {
   );
 };
 
-const NavBar = () => {
+const NavBar = ({ showInstallButton, onInstallClick, isInstalled }) => {
   const location = useLocation();
   const { streamList } = useWatchlist();
   
@@ -162,6 +178,16 @@ const NavBar = () => {
               <span>About</span>
             </button>
           </Link>
+          {!isInstalled && showInstallButton && (
+            <button 
+              className="nav-button install-button"
+              onClick={onInstallClick}
+              title="Install StreamList as an app"
+            >
+              <Download size={20} />
+              <span>Install</span>
+            </button>
+          )}
         </div>
       </div>
     </nav>
@@ -357,7 +383,7 @@ const StreamListPage = () => {
                         </p>
                         <p className="item-timestamp">
                           Added: {item.timestamp}
-                          {item.completed && ' • ✓ Watched'}
+                          {item.completed && ' â€¢ âœ“ Watched'}
                         </p>
                       </div>
                     </div>
@@ -388,22 +414,22 @@ const StreamListPage = () => {
       </div>
 
       <div className="info-box">
-        <h3 className="info-title">🎬 StreamList Features</h3>
+        <h3 className="info-title">StreamList Features</h3>
         <p className="info-text">
-          <strong>✓ Add</strong> movies and shows to your watch list<br />
-          <strong>✓ Edit</strong> any item by clicking the Edit button<br />
-          <strong>✓ Mark as watched</strong> by clicking the checkbox<br />
-          <strong>✓ Filter</strong> items by All, Active, or Watched<br />
-          <strong>✓ Delete</strong> items you no longer need<br />
-          <strong>✓ Add from Movies</strong> page when browsing!<br />
-          <strong>✓ Persistent storage</strong> - your list is saved automatically!
+          <strong>Add</strong> movies and shows to your watch list<br />
+          <strong>Edit</strong> any item by clicking the Edit button<br />
+          <strong>Mark as watched</strong> by clicking the checkbox<br />
+          <strong>Filter</strong> items by All, Active, or Watched<br />
+          <strong>Delete</strong> items you no longer need<br />
+          <strong>Add from Movies</strong> page when browsing!<br />
+          <strong>Persistent storage</strong> - your list is saved automatically!
         </p>
       </div>
     </div>
   );
 };
 
-// 🆕 ENHANCED: Movies Page with Add to Watchlist functionality
+// ðŸ†• ENHANCED: Movies Page with Add to Watchlist functionality
 const MoviesPage = () => {
   const { addToWatchlist, isInWatchlist } = useWatchlist();
   const navigate = useNavigate();
@@ -420,7 +446,7 @@ const MoviesPage = () => {
     const savedHistory = localStorage.getItem('movieSearchHistory');
     if (savedHistory) {
       setSearchHistory(JSON.parse(savedHistory));
-      console.log('✅ Loaded search history from localStorage');
+      console.log('âœ… Loaded search history from localStorage');
     }
   }, []);
 
@@ -428,17 +454,17 @@ const MoviesPage = () => {
   useEffect(() => {
     if (searchHistory.length > 0) {
       localStorage.setItem('movieSearchHistory', JSON.stringify(searchHistory));
-      console.log('✅ Saved search history to localStorage');
+      console.log('âœ… Saved search history to localStorage');
     }
   }, [searchHistory]);
 
-  // 🆕 NEW: Show notification
+  // ðŸ†• NEW: Show notification
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // 🆕 NEW: Handle add to watchlist
+  // ðŸ†• NEW: Handle add to watchlist
   const handleAddToWatchlist = (movieTitle) => {
     const result = addToWatchlist(movieTitle);
     if (result.success) {
@@ -472,10 +498,10 @@ const MoviesPage = () => {
       ];
       setSearchHistory(newHistory);
       
-      console.log('✅ Movies fetched from TMDB:', data.results);
+      console.log('âœ… Movies fetched from TMDB:', data.results);
     } catch (err) {
       setError(err.message);
-      console.error('❌ Error fetching movies:', err);
+      console.error('âŒ Error fetching movies:', err);
     } finally {
       setLoading(false);
     }
@@ -496,10 +522,10 @@ const MoviesPage = () => {
       
       const data = await response.json();
       setSelectedMovie(data);
-      console.log('✅ Movie details fetched:', data);
+      console.log('âœ… Movie details fetched:', data);
     } catch (err) {
       setError(err.message);
-      console.error('❌ Error fetching movie details:', err);
+      console.error('âŒ Error fetching movie details:', err);
     } finally {
       setLoading(false);
     }
@@ -520,11 +546,11 @@ const MoviesPage = () => {
     if (window.confirm('Clear all search history?')) {
       setSearchHistory([]);
       localStorage.removeItem('movieSearchHistory');
-      console.log('✅ Search history cleared');
+      console.log('âœ… Search history cleared');
     }
   };
 
-  // 🆕 NEW: Notification Component
+  // ðŸ†• NEW: Notification Component
   const Notification = ({ message, type }) => (
     <div className={`notification notification-${type}`}>
       <CheckCircle size={20} />
@@ -549,7 +575,7 @@ const MoviesPage = () => {
               <span>Back to Results</span>
             </button>
             
-            {/* 🆕 NEW: Add to Watchlist button */}
+            {/* ðŸ†• NEW: Add to Watchlist button */}
             <button 
               onClick={() => handleAddToWatchlist(selectedMovie.title)}
               className={`add-button ${inWatchlist ? 'in-watchlist' : ''}`}
@@ -760,7 +786,7 @@ const MoviesPage = () => {
                     </div>
                   </div>
                   
-                  {/* 🆕 NEW: Add to Watchlist button on each card */}
+                  {/* ðŸ†• NEW: Add to Watchlist button on each card */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -789,14 +815,14 @@ const MoviesPage = () => {
       </div>
 
       <div className="info-box">
-        <h3 className="info-title">🎬 Movie Explorer Features</h3>
+        <h3 className="info-title">ðŸŽ¬ Movie Explorer Features</h3>
         <p className="info-text">
-          <strong>✓ Search</strong> thousands of movies from TMDB<br />
-          <strong>✓ View Details</strong> including ratings, release dates, and descriptions<br />
-          <strong>✓ Add to Watchlist</strong> directly from search results!<br />
-          <strong>✓ Search History</strong> automatically saved for quick access<br />
-          <strong>✓ Click any movie</strong> to see full details<br />
-          <strong>✓ Persistent storage</strong> - your searches are remembered!
+          <strong>Search</strong> thousands of movies from TMDB<br />
+          <strong>View Details</strong> including ratings, release dates, and descriptions<br />
+          <strong>Add to Watchlist</strong> directly from search results!<br />
+          <strong>Search History</strong> automatically saved for quick access<br />
+          <strong>Click any movie</strong> to see full details<br />
+          <strong>Persistent storage</strong> - your searches are remembered!
         </p>
       </div>
     </div>
@@ -831,7 +857,7 @@ const AboutPage = () => (
       
       <div className="about-content">
         <div className="about-section">
-          <h3 className="about-section-title">🎬 What is StreamList?</h3>
+          <h3 className="about-section-title">What is StreamList?</h3>
           <p className="about-text">
             StreamList is a revolutionary application from EZTechMovie that helps you organize and manage your 
             entertainment preferences. Keep track of movies and shows you want to watch, mark them as completed, 
@@ -840,7 +866,7 @@ const AboutPage = () => (
         </div>
 
         <div className="about-section">
-          <h3 className="about-section-title">✨ Key Features</h3>
+          <h3 className="about-section-title">âœ¨ Key Features</h3>
           <ul className="feature-list">
             <li><strong>Smart Watch List:</strong> Add, edit, and organize your favorite content</li>
             <li><strong>Track Progress:</strong> Mark items as watched to keep track of what you've seen</li>
@@ -850,11 +876,13 @@ const AboutPage = () => (
             <li><strong>Persistent Storage:</strong> Your list and searches are automatically saved</li>
             <li><strong>User-Friendly Design:</strong> Intuitive interface with smooth transitions</li>
             <li><strong>Responsive Layout:</strong> Works beautifully on all devices</li>
+            <li><strong>PWA Support:</strong> Install as a standalone app on your device!</li>
+            <li><strong>Offline Mode:</strong> Access your watchlist even without internet</li>
           </ul>
         </div>
 
         <div className="about-section">
-          <h3 className="about-section-title">🚀 Coming Soon</h3>
+          <h3 className="about-section-title">ðŸš€ Coming Soon</h3>
           <ul className="feature-list">
             <li>Shopping cart for subscription plans</li>
             <li>Social sharing features</li>
@@ -865,7 +893,7 @@ const AboutPage = () => (
         </div>
 
         <div className="about-section">
-          <h3 className="about-section-title">💡 About EZTechMovie</h3>
+          <h3 className="about-section-title">ðŸ’¡ About EZTechMovie</h3>
           <p className="about-text">
             EZTechMovie is a privately owned video streaming company founded in April 2019, headquartered in 
             San Diego, California. Our mission is to be the highest quality movie streaming entity nationally 
@@ -874,14 +902,14 @@ const AboutPage = () => (
         </div>
 
         <div className="about-section">
-          <h3 className="about-section-title">🔧 Technical Implementation</h3>
+          <h3 className="about-section-title">ðŸ”§ Technical Implementation</h3>
           <p className="about-text">
             This application demonstrates modern web development practices including:<br />
-            <strong>• React Context API</strong> for global state management<br />
-            <strong>• TMDB API</strong> integration for movie data<br />
-            <strong>• LocalStorage</strong> for persistent data storage<br />
-            <strong>• React Router</strong> for navigation<br />
-            <strong>• Responsive Design</strong> with CSS animations
+            <strong>React Context API</strong> for global state management<br />
+            <strong>TMDB API</strong> integration for movie data<br />
+            <strong>LocalStorage</strong> for persistent data storage<br />
+            <strong>React Router</strong> for navigation<br />
+            <strong>Responsive Design</strong> with CSS animations
           </p>
         </div>
       </div>
@@ -890,11 +918,91 @@ const AboutPage = () => (
 );
 
 const App = () => {
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showOnlineStatus, setShowOnlineStatus] = useState(false);
+
+  useEffect(() => {
+    // Register service worker
+    registerServiceWorker();
+
+    // Check if app is already installed
+    const checkInstalled = () => {
+      const installed = window.matchMedia('(display-mode: standalone)').matches ||
+                       window.navigator.standalone === true;
+      setIsInstalled(installed);
+      console.log('📱 PWA installed:', installed);
+    };
+    checkInstalled();
+
+    // Listen for install prompt
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallButton(true);
+      console.log('📲 Install prompt available');
+    };
+
+    // Listen for successful installation
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setShowInstallButton(false);
+      setIsInstalled(true);
+      console.log('✅ PWA installed successfully');
+    };
+
+    // Handle online/offline status
+    const handleOnline = () => {
+      setIsOnline(true);
+      setShowOnlineStatus(true);
+      console.log('✅ Back online');
+      setTimeout(() => setShowOnlineStatus(false), 3000);
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      setShowOnlineStatus(true);
+      console.log('⚠️ Connection lost - working offline');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    console.log(`User ${outcome === 'accepted' ? 'accepted' : 'dismissed'} the install prompt`);
+    
+    if (outcome === 'accepted') {
+      setShowInstallButton(false);
+    }
+    setDeferredPrompt(null);
+  };
+
   return (
     <Router>
       <WatchlistProvider>
         <div className="app">
-          <NavBar />
+          <NavBar 
+            showInstallButton={showInstallButton} 
+            onInstallClick={handleInstallClick}
+            isInstalled={isInstalled}
+          />
           
           <div className="marquee">
             <div className="marquee-content">
@@ -920,10 +1028,27 @@ const App = () => {
           <footer className="footer">
             <div className="footer-content">
               <p className="footer-text">
-                🎬 EZTechMovie StreamList © 2024 - Your Personal Cinema Experience 🎬
+                EZTechMovie StreamList © 2024 - Your Personal Cinema Experience 
               </p>
             </div>
           </footer>
+
+          {/* Online/Offline Status Indicator */}
+          {showOnlineStatus && (
+            <div className={isOnline ? 'online-indicator' : 'offline-indicator'}>
+              {isOnline ? (
+                <>
+                  <CheckCircle size={20} />
+                  <span>Back Online!</span>
+                </>
+              ) : (
+                <>
+                  <X size={20} />
+                  <span>Working Offline</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </WatchlistProvider>
     </Router>

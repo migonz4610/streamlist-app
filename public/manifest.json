@@ -1,25 +1,74 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "StreamList",
+  "name": "EZTechMovie StreamList - Your Personal Watch List",
+  "description": "Organize and manage your entertainment with StreamList. Keep track of movies and shows you want to watch, discover new content, and never forget what's on your watch list!",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo192.png",
+      "src": "/icon-512x512.png",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#7f1d1d",
+  "background_color": "#1a1a1a",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["entertainment", "lifestyle", "utilities"],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "My Watchlist",
+      "short_name": "Watchlist",
+      "description": "View your saved watchlist",
+      "url": "/",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Browse Movies",
+      "short_name": "Movies",
+      "description": "Explore and discover movies",
+      "url": "/movies",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "About",
+      "short_name": "About",
+      "description": "Learn about StreamList",
+      "url": "/about",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-1.png",
+      "type": "image/png",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot-2.png",
+      "type": "image/png",
+      "sizes": "750x1334",
+      "form_factor": "narrow"
+    }
+  ],
+  "related_applications": [],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
